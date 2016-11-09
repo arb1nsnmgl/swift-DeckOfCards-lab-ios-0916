@@ -15,6 +15,11 @@ class CardView: UIView {
     @IBOutlet var contentView: UIView!
     @IBOutlet weak var imageView: UIImageView!
     
+    weak var card: Card! {
+        didSet {
+            updateViewToReflectNewCard()
+        }
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -47,7 +52,19 @@ extension CardView {
         
         // TODO: Update the view accordingly
         
-    }
+        card.downloadImage({ success in
+            
+            if success {
+                OperationQueue.main.addOperation {
+                    if let cardImage = self.card.image {
+                        self.imageView.image = cardImage
+                    }
+                }
+            }
+            
+        })
+        
+     }
 
 }
 
@@ -58,8 +75,9 @@ extension CardView {
      func setupGestureRecognizer() {
         
         // TODO: Setup Pan Gesture Recognizer
-        
-        
+        let gesture = UIPanGestureRecognizer(target: self, action: #selector(CardView.viewMoved(_:)))
+        self.isUserInteractionEnabled = true
+        self.addGestureRecognizer(gesture)
         
     }
     
@@ -67,12 +85,11 @@ extension CardView {
         
         // TODO: Update self.center to reflect the new center
         
+        self.center = gesture.location(in: nil)
+        
     }
     
 }
-
-
-
 
 // MARK: - UIView Extension
 extension UIView {
